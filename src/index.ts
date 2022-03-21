@@ -35,12 +35,10 @@ export default class PubSubManager<P> {
       .createTopic({ Name: options.topicName })
       .promise()
       .then((response) => {
-        // @ts-expect-error TopicArn can be undefined but it should not happen
-        const topicArn: string = response.TopicArn
         if (!response.TopicArn) {
           throw new Error('AWS did not return ARN for created SNS topic')
         }
-        this.pubsub = new SnsPubSub<P>(topicArn)
+        this.pubsub = new SnsPubSub<P>(response.TopicArn)
         this.emitter.emit('ready')
       })
       .catch((err) => this.emitter.emit('error', err))
@@ -59,14 +57,18 @@ export default class PubSubManager<P> {
   }
 
   waitPubsubInit() {
+    if (this.pubsub) {
+      return
+    }
+
     return new Promise<void>((resolve, reject) => {
       this.emitter.once('ready', () => {
         this.emitter.removeAllListeners('error')
         resolve()
       })
-      this.emitter.once('error', () => {
+      this.emitter.once('error', (err) => {
         this.emitter.removeAllListeners('ready')
-        reject()
+        reject(err)
       })
     })
   }
