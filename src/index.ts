@@ -1,7 +1,10 @@
+import debug from 'debug'
 import EventEmitter from 'events'
 import SnsPubSub from './sns-pub-sub'
 
 /* eslint-disable class-methods-use-this */
+
+const log = debug('sns-pubsub:info')
 
 interface LambdaSnsRecord {
   Sns: {
@@ -31,6 +34,8 @@ export default class PubSubManager<P> {
       return
     }
 
+    log('Creating pubsub topic: %s', options.topicName)
+
     SnsPubSub.client
       .createTopic({ Name: options.topicName })
       .promise()
@@ -40,9 +45,10 @@ export default class PubSubManager<P> {
         }
         this.pubsub = new SnsPubSub<P>(response.TopicArn)
         this.emitter.emit('ready')
+
+        log('Pubsub topic created!')
       })
       .catch((err) => this.emitter.emit('error', err))
-    return
   }
 
   getSnsConsumer(consumer: Consumer<P>) {
@@ -90,8 +96,10 @@ export default class PubSubManager<P> {
 
   async publish(message: P) {
     if (!this.pubsub) {
+      log('Waiting for init...')
       await this.waitPubsubInit()
     }
     await (this.pubsub as SnsPubSub<P>).publish(message)
+    log('Message published.')
   }
 }

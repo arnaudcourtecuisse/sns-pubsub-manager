@@ -3,7 +3,7 @@
   "files": [
     "lib/**/*"
   ],
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "A library to manage a SNS PubSub",
   "main": "lib/index.js",
   "scripts": {
@@ -15,11 +15,13 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@types/debug": "^4.1.7",
     "@types/node": "^17.0.21",
     "prettier": "^2.5.1",
     "typescript": "^4.6.2"
   },
   "dependencies": {
-    "aws-sdk": "^2.1092.0"
+    "aws-sdk": "^2.1092.0",
+    "debug": "^4.3.4"
   }
 }
